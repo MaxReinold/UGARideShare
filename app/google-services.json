@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "177279041307",
+    "firebase_url": "https://ugarideshare-78042-default-rtdb.firebaseio.com",
+    "project_id": "ugarideshare-78042",
+    "storage_bucket": "ugarideshare-78042.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177279041307:android:53bbb0ad67e55deb6c5dbe",
+        "android_client_info": {
+          "package_name": "edu.uga.cs.ugarideshare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApGIQ9kPP2vofYls6Wk31LCuxBZCP6THE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
