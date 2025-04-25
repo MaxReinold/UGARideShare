@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseUser user;
     TextView emailDisplay;
     TextView pointsDisplay;
+    Button btnRequestRide, btnViewMyRides;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,10 +78,17 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        Button btnRequestRide = findViewById(R.id.btn_new_ride);
+        btnRequestRide = findViewById(R.id.btn_new_ride);
+        btnViewMyRides = findViewById(R.id.btn_view_rides);
 
         btnRequestRide.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, NewRide.class);
+            startActivity(intent);
+            finish();
+        });
+
+        btnViewMyRides.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ViewMyRides.class);
             startActivity(intent);
             finish();
         });

@@ -12,4 +12,5 @@
     <string name="create_a_new_ride">Create a New Ride</string>
     <string name="offer">Offer</string>
     <string name="request">Request</string>
+    <string name="my_active_rides">My Active Rides</string>
 </resources>
