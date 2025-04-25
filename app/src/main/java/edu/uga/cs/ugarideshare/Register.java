@@ -85,6 +85,16 @@ public class Register extends AppCompatActivity {
                     return;
                 }
 
+                if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                    Toast.makeText(Register.this, "Invalid Email", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (password.length() < 8) {
+                    Toast.makeText(Register.this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 mAuth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
