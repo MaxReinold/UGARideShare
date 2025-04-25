@@ -80,31 +80,10 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // New buttons for main actions
-        Button btnRequestRide = findViewById(R.id.btn_request_ride);
-        Button btnOfferRide = findViewById(R.id.btn_offer_ride);
-        Button btnViewRideOffers = findViewById(R.id.btn_view_ride_offers);
-        Button btnViewRideRequests = findViewById(R.id.btn_view_ride_requests);
-        Button btnViewMyRides = findViewById(R.id.btn_view_my_rides);
+        Button btnRequestRide = findViewById(R.id.btn_new_ride);
 
         btnRequestRide.setOnClickListener(v -> {
-            // TODO: Start RequestRideActivity
-        });
 
-        btnOfferRide.setOnClickListener(v -> {
-            // TODO: Start OfferRideActivity
-        });
-
-        btnViewRideOffers.setOnClickListener(v -> {
-            // TODO: Start ViewRideOffersActivity
-        });
-
-        btnViewRideRequests.setOnClickListener(v -> {
-            // TODO: Start ViewRideRequestsActivity
-        });
-
-        btnViewMyRides.setOnClickListener(v -> {
-            // TODO: Start ViewMyRidesActivity
         });
     }
 
