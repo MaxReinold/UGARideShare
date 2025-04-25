@@ -1,7 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.UGARideShare" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.UGARideShare" parent="@style/Theme.AppCompat.DayNight">
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
+
+    <style name="Theme.UGARideShare" parent="Base.Theme.UGARideShare" />
+    <style name="Theme.UGARideShare.NoActionBar" parent="@style/Theme.AppCompat.DayNight.NoActionBar" />
 </resources>

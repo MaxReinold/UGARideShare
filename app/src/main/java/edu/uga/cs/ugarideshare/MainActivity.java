@@ -45,9 +45,6 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         mAuth = FirebaseAuth.getInstance();
         dbRef = FirebaseDatabase.getInstance();
         emailDisplay = findViewById(R.id.user_email);
@@ -83,7 +80,9 @@ public class MainActivity extends AppCompatActivity {
         Button btnRequestRide = findViewById(R.id.btn_new_ride);
 
         btnRequestRide.setOnClickListener(v -> {
-
+            Intent intent = new Intent(MainActivity.this, NewRide.class);
+            startActivity(intent);
+            finish();
         });
     }
 
@@ -97,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
             FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(getApplicationContext(), Login.class);
+            Intent intent = new Intent(MainActivity.this, Login.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();

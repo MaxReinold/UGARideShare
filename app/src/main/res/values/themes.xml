@@ -1,9 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.UGARideShare" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.UGARideShare" parent="@style/Theme.AppCompat.DayNight">
     </style>
 
     <style name="Theme.UGARideShare" parent="Base.Theme.UGARideShare" />
+
+    <style name="Theme.UGARideShare.NoActionBar" parent="@style/Theme.AppCompat.DayNight.NoActionBar" />
 </resources>
