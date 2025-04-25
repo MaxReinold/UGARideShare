@@ -1,7 +1,10 @@
 package edu.uga.cs.ugarideshare;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "UGARideShare";
     private FirebaseAuth mAuth;
+    FirebaseUser user;
+    Button logoutBtn;
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,48 +45,26 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        TextView textView = findViewById( R.id.textView );
-
         mAuth = FirebaseAuth.getInstance();
-        String email = "dev@uga.edu";
-        String password = "password";
+        logoutBtn = findViewById(R.id.logoutBtn);
+        textView = findViewById(R.id.user_email);
+        user = mAuth.getCurrentUser();
 
-        mAuth.signInWithEmailAndPassword( email, password )
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d( TAG, "signInWithEmail:success" );
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        }
-                        else {
-                            // If sign in fails, display a message to the user.
-                            Log.d( TAG, "signInWithEmail:failure", task.getException() );
-                            Toast.makeText( MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        if (user == null) {
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            finish();
+        } else {
+            textView.setText(user.getEmail());
+        }
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference( "message" );
-
-        myRef.addValueEventListener( new ValueEventListener() {
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDataChange( DataSnapshot dataSnapshot ) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String message = dataSnapshot.getValue( String.class );
-
-                Log.d( TAG, "Read message: " + message );
-                textView.setText( message );
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.d( TAG, "Failed to read value.", error.toException() );
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(getApplicationContext(), Login.class);
+                startActivity(intent);
+                finish();
             }
         });
     }
