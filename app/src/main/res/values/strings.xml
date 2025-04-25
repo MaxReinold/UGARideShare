@@ -7,4 +7,6 @@
     <string name="click_to_login">Click to Login</string>
     <string name="click_to_register">Click to Register</string>
     <string name="logout">Logout</string>
+    <string name="welcome">Welcome, %1$s</string>
+    <string name="current_points">Current Points:</string>
 </resources>

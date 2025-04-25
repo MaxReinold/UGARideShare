@@ -1,23 +1,22 @@
 package edu.uga.cs.ugarideshare;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,9 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "UGARideShare";
     private FirebaseAuth mAuth;
+    private FirebaseDatabase dbRef;
     FirebaseUser user;
-    Button logoutBtn;
-    TextView textView;
+    TextView emailDisplay;
+    TextView pointsDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +45,13 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         mAuth = FirebaseAuth.getInstance();
-        logoutBtn = findViewById(R.id.logoutBtn);
-        textView = findViewById(R.id.user_email);
+        dbRef = FirebaseDatabase.getInstance();
+        emailDisplay = findViewById(R.id.user_email);
+        pointsDisplay = findViewById(R.id.points_display);
         user = mAuth.getCurrentUser();
 
         if (user == null) {
@@ -55,17 +59,71 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            textView.setText(user.getEmail());
+            emailDisplay.setText(getResources().getString(R.string.welcome, user.getEmail()));
+            DatabaseReference userRef = dbRef.getReference("users").child(user.getUid());
+            userRef.child("points").addValueEventListener(new ValueEventListener() {
+                @SuppressLint("DefaultLocale")
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        Long numberValue = dataSnapshot.getValue(Long.class);
+                        if (numberValue != null) {
+                            pointsDisplay.setText(String.format("%,d", numberValue));
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e(TAG, databaseError.toString());
+                }
+            });
         }
 
-        logoutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(getApplicationContext(), Login.class);
-                startActivity(intent);
-                finish();
-            }
+        // New buttons for main actions
+        Button btnRequestRide = findViewById(R.id.btn_request_ride);
+        Button btnOfferRide = findViewById(R.id.btn_offer_ride);
+        Button btnViewRideOffers = findViewById(R.id.btn_view_ride_offers);
+        Button btnViewRideRequests = findViewById(R.id.btn_view_ride_requests);
+        Button btnViewMyRides = findViewById(R.id.btn_view_my_rides);
+
+        btnRequestRide.setOnClickListener(v -> {
+            // TODO: Start RequestRideActivity
         });
+
+        btnOfferRide.setOnClickListener(v -> {
+            // TODO: Start OfferRideActivity
+        });
+
+        btnViewRideOffers.setOnClickListener(v -> {
+            // TODO: Start ViewRideOffersActivity
+        });
+
+        btnViewRideRequests.setOnClickListener(v -> {
+            // TODO: Start ViewRideRequestsActivity
+        });
+
+        btnViewMyRides.setOnClickListener(v -> {
+            // TODO: Start ViewMyRidesActivity
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_logout) {
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
