@@ -6,6 +6,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.EditText;
+import android.widget.Switch;
+import android.app.TimePickerDialog;
+import android.app.DatePickerDialog;
+import android.text.format.DateFormat;
+import android.text.TextWatcher;
+import android.text.Editable;
 import android.graphics.Typeface;
 
 import androidx.activity.EdgeToEdge;
@@ -23,22 +30,27 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DatabaseError;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 public class ViewRide extends AppCompatActivity {
 
     private String rideId;
+    private boolean isOnlyUser = false;
+    private boolean isDriver = false;
+    private boolean isRider = false;
+    private boolean isUnrelated = false;
+    private String userUid;
+    private String userEmail;
+    private Calendar calendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(40, 40, 40, 40);
-
-        setContentView(layout);
-
-        ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
+        setContentView(R.layout.activity_view_ride);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -66,7 +78,25 @@ public class ViewRide extends AppCompatActivity {
             finish();
             return;
         }
-        String userUid = firebaseUser.getUid();
+        userUid = firebaseUser.getUid();
+        userEmail = firebaseUser.getEmail();
+
+        // UI references
+        Switch rideTypeSwitch = findViewById(R.id.rideTypeSwitch);
+        TextView byLabel = findViewById(R.id.byLabel);
+        EditText byEmail = findViewById(R.id.byEmail);
+        EditText timeInput = findViewById(R.id.timeInput);
+        EditText dateInput = findViewById(R.id.dateInput);
+        EditText addressFrom = findViewById(R.id.addressFrom);
+        EditText addressTo = findViewById(R.id.addressTo);
+        Button actionRideBtn = findViewById(R.id.actionRideBtn);
+        TextView requestLabel = findViewById(R.id.requestLabel);
+        TextView offerLabel = findViewById(R.id.offerLabel);
+        LinearLayout toggleRow = findViewById(R.id.toggleRow);
+
+        // Disable toggle by default
+        rideTypeSwitch.setEnabled(false);
+        toggleRow.setEnabled(false);
 
         DatabaseReference rideRef = FirebaseDatabase.getInstance().getReference("rides").child(rideId);
         rideRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -78,64 +108,171 @@ public class ViewRide extends AppCompatActivity {
                     return;
                 }
 
-                String addressFrom = rideSnap.child("addressFrom").getValue(String.class);
-                String addressTo = rideSnap.child("addressTo").getValue(String.class);
-                String dateStr = String.valueOf(rideSnap.child("date").getValue());
+                // Get ride info
+                String addressFromVal = rideSnap.child("addressFrom").getValue(String.class);
+                String addressToVal = rideSnap.child("addressTo").getValue(String.class);
+                Object dateObjRaw = rideSnap.child("date").getValue();
                 String driverEmail = rideSnap.child("userDriver/email").getValue(String.class);
                 String riderEmail = rideSnap.child("userRider/email").getValue(String.class);
                 String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
                 String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
 
-                // Display ride info
-                TextView title = new TextView(ViewRide.this);
-                title.setText("Ride Details");
-                title.setTextSize(22);
-                title.setTypeface(null, Typeface.BOLD);
-                title.setPadding(0, 0, 0, 24);
-
-                TextView info = new TextView(ViewRide.this);
-                info.setText(
-                        "From: " + (addressFrom != null ? addressFrom : "") + "\n" +
-                        "To: " + (addressTo != null ? addressTo : "") + "\n" +
-                        "Date: " + dateStr + "\n" +
-                        "Driver: " + (driverEmail != null ? driverEmail : "None") + "\n" +
-                        "Rider: " + (riderEmail != null ? riderEmail : "None")
-                );
-                info.setTextSize(18);
-                info.setPadding(0, 0, 0, 32);
-
-                Button cancelBtn = new Button(ViewRide.this);
-                cancelBtn.setText("Cancel");
-                cancelBtn.setAllCaps(false);
-
-                // Determine if user is only one in ride
-                boolean isOnlyUser;
-                boolean isDriver, isRider;
-                if (driverUid != null && driverUid.equals(userUid) && (riderUid == null || riderUid.isEmpty())) {
-                    isRider = false;
-                    isOnlyUser = true;
-                    isDriver = true;
-                } else if (riderUid != null && riderUid.equals(userUid) && (driverUid == null || driverUid.isEmpty())) {
-                    isDriver = false;
-                    isOnlyUser = true;
-                    isRider = true;
-                } else {
-                    isOnlyUser = false;
-                    if (driverUid != null && driverUid.equals(userUid)) isDriver = true;
-                    else {
-                        isDriver = false;
-                    }
-                    if (riderUid != null && riderUid.equals(userUid)) isRider = true;
-                    else {
-                        isRider = false;
+                // Set calendar to ride date
+                Date rideDate = null;
+                if (dateObjRaw != null) {
+                    try {
+                        long millis = 0;
+                        if (dateObjRaw instanceof Long) {
+                            millis = (Long) dateObjRaw;
+                        } else if (dateObjRaw instanceof Double) {
+                            millis = ((Double) dateObjRaw).longValue();
+                        }
+                        rideDate = new Date(millis);
+                        calendar.setTime(rideDate);
+                    } catch (Exception e) {
+                        // fallback: ignore
                     }
                 }
 
-                cancelBtn.setOnClickListener(v -> {
-                    if (isOnlyUser) {
+                // Fill fields
+                addressFrom.setText(addressFromVal != null ? addressFromVal : "");
+                addressTo.setText(addressToVal != null ? addressToVal : "");
+                if (rideDate != null) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
+                    dateInput.setText(sdf.format(rideDate));
+                    timeInput.setText(stf.format(rideDate));
+                } else {
+                    dateInput.setText("");
+                    timeInput.setText("");
+                }
+
+                // Determine ride type and user role
+                boolean hasDriver = driverUid != null && !driverUid.isEmpty();
+                boolean hasRider = riderUid != null && !riderUid.isEmpty();
+                isDriver = hasDriver && driverUid.equals(userUid);
+                isRider = hasRider && riderUid.equals(userUid);
+                isOnlyUser = (isDriver && !hasRider) || (isRider && !hasDriver);
+                isUnrelated = !isDriver && !isRider;
+
+                // Set toggle and byLabel/byEmail
+                if (hasDriver && !hasRider) {
+                    // Offered ride
+                    rideTypeSwitch.setChecked(true);
+                    offerLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+                    requestLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
+                    byLabel.setText("Offered by");
+                    byEmail.setText(driverEmail != null ? driverEmail : "");
+                } else if (!hasDriver && hasRider) {
+                    // Requested ride
+                    rideTypeSwitch.setChecked(false);
+                    requestLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+                    offerLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
+                    byLabel.setText("Requested by");
+                    byEmail.setText(riderEmail != null ? riderEmail : "");
+                } else if (hasDriver && hasRider) {
+                    // Both present, show both
+                    rideTypeSwitch.setChecked(true);
+                    offerLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+                    requestLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
+                    byLabel.setText("Offered by");
+                    byEmail.setText(driverEmail != null ? driverEmail : "");
+                } else {
+                    // Should not happen
+                    rideTypeSwitch.setChecked(false);
+                    byLabel.setText("By");
+                    byEmail.setText("");
+                }
+
+                // Set fields enabled/disabled
+                boolean editable = isOnlyUser;
+                addressFrom.setEnabled(editable);
+                addressTo.setEnabled(editable);
+                dateInput.setEnabled(editable);
+                timeInput.setEnabled(editable);
+                dateInput.setFocusable(editable);
+                dateInput.setClickable(editable);
+                timeInput.setFocusable(editable);
+                timeInput.setClickable(editable);
+
+                // Date/time pickers if editable
+                if (editable) {
+                    dateInput.setOnClickListener(v -> {
+                        int year = calendar.get(Calendar.YEAR);
+                        int month = calendar.get(Calendar.MONTH);
+                        int day = calendar.get(Calendar.DAY_OF_MONTH);
+                        DatePickerDialog datePickerDialog = new DatePickerDialog(ViewRide.this,
+                            (view, y, m, d) -> {
+                                calendar.set(Calendar.YEAR, y);
+                                calendar.set(Calendar.MONTH, m);
+                                calendar.set(Calendar.DAY_OF_MONTH, d);
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                                dateInput.setText(sdf.format(calendar.getTime()));
+                            }, year, month, day);
+                        datePickerDialog.show();
+                    });
+                    timeInput.setOnClickListener(v -> {
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minute = calendar.get(Calendar.MINUTE);
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(ViewRide.this,
+                            (view, hourOfDay, minute1) -> {
+                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                calendar.set(Calendar.MINUTE, minute1);
+                                calendar.set(Calendar.SECOND, 0);
+                                String timeStr = String.format("%02d:%02d", hourOfDay, minute1);
+                                timeInput.setText(timeStr);
+                            }, hour, minute, DateFormat.is24HourFormat(ViewRide.this));
+                        timePickerDialog.show();
+                    });
+                } else {
+                    dateInput.setOnClickListener(null);
+                    timeInput.setOnClickListener(null);
+                }
+
+                // Action button logic
+                if (isOnlyUser) {
+                    // Allow edit and cancel
+                    actionRideBtn.setText("Save Changes");
+                    actionRideBtn.setEnabled(true);
+
+                    Button cancelBtn = new Button(ViewRide.this);
+                    cancelBtn.setText("Cancel Ride");
+                    cancelBtn.setAllCaps(false);
+                    ((LinearLayout) findViewById(R.id.main)).addView(cancelBtn);
+
+                    actionRideBtn.setOnClickListener(v -> {
+                        // Save changes
+                        String addrFrom = addressFrom.getText().toString().trim();
+                        String addrTo = addressTo.getText().toString().trim();
+                        String dateStr = dateInput.getText().toString().trim();
+                        String timeStr = timeInput.getText().toString().trim();
+                        if (addrFrom.isEmpty() || addrTo.isEmpty() || dateStr.isEmpty() || timeStr.isEmpty()) {
+                            Toast.makeText(ViewRide.this, "All fields required.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                            Date newDate = sdf.parse(dateStr + " " + timeStr);
+                            rideRef.child("addressFrom").setValue(addrFrom);
+                            rideRef.child("addressTo").setValue(addrTo);
+                            rideRef.child("date").setValue(newDate.getTime());
+                            Toast.makeText(ViewRide.this, "Ride updated.", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            Toast.makeText(ViewRide.this, "Invalid date/time.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    cancelBtn.setOnClickListener(v -> {
                         rideRef.removeValue();
                         Toast.makeText(ViewRide.this, "Ride canceled.", Toast.LENGTH_SHORT).show();
-                    } else {
+                        finish();
+                    });
+
+                } else if (isDriver || isRider) {
+                    // Allow remove self
+                    actionRideBtn.setText("Remove Me From Ride");
+                    actionRideBtn.setEnabled(true);
+                    actionRideBtn.setOnClickListener(v -> {
                         if (isDriver) {
                             rideRef.child("userDriver").removeValue();
                         }
@@ -143,14 +280,36 @@ public class ViewRide extends AppCompatActivity {
                             rideRef.child("userRider").removeValue();
                         }
                         Toast.makeText(ViewRide.this, "You have been removed from this ride.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                } else if (isUnrelated) {
+                    // Allow accept as driver or rider
+                    if (hasDriver && !hasRider) {
+                        actionRideBtn.setText("Accept as Rider");
+                        actionRideBtn.setEnabled(true);
+                        actionRideBtn.setOnClickListener(v -> {
+                            rideRef.child("userRider").child("uid").setValue(userUid);
+                            rideRef.child("userRider").child("email").setValue(userEmail);
+                            Toast.makeText(ViewRide.this, "You are now the rider.", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    } else if (!hasDriver && hasRider) {
+                        actionRideBtn.setText("Accept as Driver");
+                        actionRideBtn.setEnabled(true);
+                        actionRideBtn.setOnClickListener(v -> {
+                            rideRef.child("userDriver").child("uid").setValue(userUid);
+                            rideRef.child("userDriver").child("email").setValue(userEmail);
+                            Toast.makeText(ViewRide.this, "You are now the driver.", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    } else {
+                        actionRideBtn.setText("Ride Full");
+                        actionRideBtn.setEnabled(false);
                     }
-                    finish();
-                });
-
-                layout.removeAllViews();
-                layout.addView(title);
-                layout.addView(info);
-                layout.addView(cancelBtn);
+                } else {
+                    actionRideBtn.setText("N/A");
+                    actionRideBtn.setEnabled(false);
+                }
             }
 
             @Override

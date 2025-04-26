@@ -76,4 +76,30 @@
         android:text="@string/my_active_rides"
         android:textColor="#FFFFFF" />
 
+    <Button
+        android:id="@+id/btn_view_requested_rides"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#1976D2"
+        android:elevation="2dp"
+        android:padding="24dp"
+        android:text="Requested Rides"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btn_view_offered_rides"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#1976D2"
+        android:elevation="2dp"
+        android:padding="24dp"
+        android:text="Offered Rides"
+        android:textColor="#FFFFFF" />
+
 </LinearLayout>

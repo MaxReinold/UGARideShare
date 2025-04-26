@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseUser user;
     TextView emailDisplay;
     TextView pointsDisplay;
-    Button btnRequestRide, btnViewMyRides;
+    Button btnRequestRide, btnViewMyRides, btnViewOfferedRides, btnViewRequestedRides;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
         btnRequestRide = findViewById(R.id.btn_new_ride);
         btnViewMyRides = findViewById(R.id.btn_view_rides);
+        btnViewOfferedRides = findViewById(R.id.btn_view_offered_rides);
+        btnViewRequestedRides = findViewById(R.id.btn_view_requested_rides);
 
         btnRequestRide.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, NewRide.class);
@@ -87,6 +89,16 @@ public class MainActivity extends AppCompatActivity {
 
         btnViewMyRides.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ViewMyRides.class);
+            startActivity(intent);
+        });
+
+        btnViewOfferedRides.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ViewOfferedRides.class);
+            startActivity(intent);
+        });
+
+        btnViewRequestedRides.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ViewRequestedRides.class);
             startActivity(intent);
         });
     }

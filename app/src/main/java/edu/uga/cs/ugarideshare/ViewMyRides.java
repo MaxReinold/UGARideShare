@@ -39,6 +39,10 @@ public class ViewMyRides extends AppCompatActivity {
 
     private List<String> rideKeys = new ArrayList<>();
     private List<String> rideSummaries = new ArrayList<>();
+    private ValueEventListener ridesListener;
+    private DatabaseReference ridesRef;
+    private LinearLayout rideListLayout;
+    private String userUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,18 +65,23 @@ public class ViewMyRides extends AppCompatActivity {
             finish();
             return;
         }
-        String userUid = firebaseUser.getUid();
+        userUid = firebaseUser.getUid();
 
-        LinearLayout rideListLayout = findViewById(R.id.rideListLayout);
+        rideListLayout = findViewById(R.id.rideListLayout);
+        ridesRef = FirebaseDatabase.getInstance().getReference("rides");
+    }
 
-        DatabaseReference ridesRef = FirebaseDatabase.getInstance().getReference("rides");
-        ridesRef.addValueEventListener(new ValueEventListener() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        rideListLayout.removeAllViews();
+        rideKeys.clear();
+        rideSummaries.clear();
+
+        ridesListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                // Remove all views except the example card (index 0)
-                while (rideListLayout.getChildCount() > 1) {
-                    rideListLayout.removeViewAt(1);
-                }
+                rideListLayout.removeAllViews();
                 rideKeys.clear();
                 rideSummaries.clear();
                 List<DataSnapshot> userRides = new ArrayList<>();
@@ -175,7 +184,16 @@ public class ViewMyRides extends AppCompatActivity {
             public void onCancelled(DatabaseError error) {
                 Toast.makeText(ViewMyRides.this, "Failed to load rides.", Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+        ridesRef.addValueEventListener(ridesListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (ridesListener != null) {
+            ridesRef.removeEventListener(ridesListener);
+        }
     }
 
     @Override
