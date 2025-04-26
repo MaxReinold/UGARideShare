@@ -169,8 +169,6 @@ public class ViewRide extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        Intent intent = new Intent(this, ViewMyRides.class);
-        startActivity(intent);
         finish();
         return true;
     }

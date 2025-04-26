@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         if (user == null) {
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
-            finish();
         } else {
             emailDisplay.setText(getResources().getString(R.string.welcome, user.getEmail()));
             DatabaseReference userRef = dbRef.getReference("users").child(user.getUid());
@@ -84,13 +83,11 @@ public class MainActivity extends AppCompatActivity {
         btnRequestRide.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, NewRide.class);
             startActivity(intent);
-            finish();
         });
 
         btnViewMyRides.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ViewMyRides.class);
             startActivity(intent);
-            finish();
         });
     }
 

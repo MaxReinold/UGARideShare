@@ -15,6 +15,12 @@
         android:theme="@style/Theme.UGARideShare"
         tools:targetApi="31">
         <activity
+            android:name=".ViewRequestedRides"
+            android:exported="false" />
+        <activity
+            android:name=".ViewOfferedRides"
+            android:exported="false" />
+        <activity
             android:name=".ViewRide"
             android:exported="false" />
         <activity

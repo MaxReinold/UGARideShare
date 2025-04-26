@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.cardview.widget.CardView;
 
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -29,7 +30,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DatabaseError;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ViewMyRides extends AppCompatActivity {
@@ -60,21 +63,16 @@ public class ViewMyRides extends AppCompatActivity {
         }
         String userUid = firebaseUser.getUid();
 
-        LinearLayout rideListLayout = new LinearLayout(this);
-        rideListLayout.setOrientation(LinearLayout.VERTICAL);
-        rideListLayout.setPadding(24, 24, 24, 24);
-
-        ScrollView scrollView = new ScrollView(this);
-        scrollView.addView(rideListLayout);
-
-        ViewGroup root = findViewById(R.id.main);
-        root.addView(scrollView);
+        LinearLayout rideListLayout = findViewById(R.id.rideListLayout);
 
         DatabaseReference ridesRef = FirebaseDatabase.getInstance().getReference("rides");
         ridesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                rideListLayout.removeAllViews();
+                // Remove all views except the example card (index 0)
+                while (rideListLayout.getChildCount() > 1) {
+                    rideListLayout.removeViewAt(1);
+                }
                 rideKeys.clear();
                 rideSummaries.clear();
                 List<DataSnapshot> userRides = new ArrayList<>();
@@ -105,30 +103,70 @@ public class ViewMyRides extends AppCompatActivity {
                         String rideId = rideSnap.getKey();
                         String addressFrom = rideSnap.child("addressFrom").getValue(String.class);
                         String addressTo = rideSnap.child("addressTo").getValue(String.class);
-                        String dateStr = String.valueOf(rideSnap.child("date").getValue());
-                        String driverEmail = rideSnap.child("userDriver/email").getValue(String.class);
-                        String riderEmail = rideSnap.child("userRider/email").getValue(String.class);
+                        Object dateObjRaw = rideSnap.child("date").getValue();
+                        String dateStr = "";
+                        if (dateObjRaw != null) {
+                            try {
+                                long millis = 0;
+                                if (dateObjRaw instanceof Long) {
+                                    millis = (Long) dateObjRaw;
+                                } else if (dateObjRaw instanceof Double) {
+                                    millis = ((Double) dateObjRaw).longValue();
+                                }
+                                dateStr = DateFormat.getDateTimeInstance().format(new Date(millis));
+                            } catch (Exception e) {
+                                dateStr = String.valueOf(dateObjRaw);
+                            }
+                        }
 
-                        // Compose a summary for the button
-                        String summary = "From: " + (addressFrom != null ? addressFrom : "") +
-                                " | To: " + (addressTo != null ? addressTo : "") +
-                                " | Date: " + dateStr;
+                        CardView cardView = new CardView(ViewMyRides.this);
+                        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                        );
+                        cardParams.setMargins(20, 20, 20, 20);
+                        cardView.setLayoutParams(cardParams);
+                        cardView.setRadius(16);
+                        cardView.setCardElevation(8);
 
-                        Button rideBtn = new Button(ViewMyRides.this);
-                        rideBtn.setText(summary);
-                        rideBtn.setAllCaps(false);
+                        LinearLayout cardContent = new LinearLayout(ViewMyRides.this);
+                        cardContent.setOrientation(LinearLayout.VERTICAL);
+                        cardContent.setPadding(48, 32, 48, 32);
 
-                        // Save for state restoration
+                        TextView fromView = new TextView(ViewMyRides.this);
+                        fromView.setText("From: " + (addressFrom != null ? addressFrom : ""));
+                        fromView.setTextSize(18);
+                        fromView.setTypeface(null, Typeface.BOLD);
+
+                        TextView toView = new TextView(ViewMyRides.this);
+                        toView.setText("To: " + (addressTo != null ? addressTo : ""));
+                        toView.setTextSize(18);
+
+                        TextView dateView = new TextView(ViewMyRides.this);
+                        dateView.setText("Date: " + dateStr);
+                        dateView.setTextSize(16);
+                        dateView.setTypeface(null, Typeface.ITALIC);
+
+                        Button detailsBtn = new Button(ViewMyRides.this);
+                        detailsBtn.setText("View Details");
+                        detailsBtn.setAllCaps(false);
+
                         rideKeys.add(rideId);
-                        rideSummaries.add(summary);
+                        rideSummaries.add(addressFrom + " - " + addressTo + " - " + dateStr);
 
-                        rideBtn.setOnClickListener(v -> {
+                        detailsBtn.setOnClickListener(v -> {
                             Intent intent = new Intent(ViewMyRides.this, ViewRide.class);
                             intent.putExtra("rideId", rideId);
                             startActivity(intent);
                         });
 
-                        rideListLayout.addView(rideBtn);
+                        cardContent.addView(fromView);
+                        cardContent.addView(toView);
+                        cardContent.addView(dateView);
+                        cardContent.addView(detailsBtn);
+
+                        cardView.addView(cardContent);
+                        rideListLayout.addView(cardView);
                     }
                 }
             }
@@ -152,13 +190,10 @@ public class ViewMyRides extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         rideKeys = savedInstanceState.getStringArrayList("rideKeys");
         rideSummaries = savedInstanceState.getStringArrayList("rideSummaries");
-        // UI will be rebuilt by Firebase listener, so nothing else needed here
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
         finish();
         return true;
     }

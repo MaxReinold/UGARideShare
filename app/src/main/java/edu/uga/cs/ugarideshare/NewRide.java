@@ -50,7 +50,6 @@ public class NewRide extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        // --- New code for ride creation UI ---
         Switch rideTypeSwitch = findViewById(R.id.rideTypeSwitch);
         TextView byLabel = findViewById(R.id.byLabel);
         EditText byEmail = findViewById(R.id.byEmail);
@@ -64,7 +63,6 @@ public class NewRide extends AppCompatActivity {
         TextView offerLabel = findViewById(R.id.offerLabel);
         LinearLayout toggleRow = findViewById(R.id.toggleRow);
 
-        // Get current user from FirebaseAuth
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         final Calendar calendar = Calendar.getInstance();
         String userUid;
@@ -78,37 +76,28 @@ public class NewRide extends AppCompatActivity {
         }
         byEmail.setText(userEmail);
 
-        // Helper to update bolding and label
         Runnable updateToggleUI = () -> {
             if (rideTypeSwitch.isChecked()) {
-                // Offer selected
                 offerLabel.setTypeface(null, android.graphics.Typeface.BOLD);
                 requestLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
                 byLabel.setText("Offered by");
             } else {
-                // Request selected
                 requestLabel.setTypeface(null, android.graphics.Typeface.BOLD);
                 offerLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
                 byLabel.setText("Requested by");
             }
         };
 
-        // Set up toggle logic
         rideTypeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> updateToggleUI.run());
 
-        // Make the whole row clickable to toggle
         toggleRow.setOnClickListener(v -> {
             rideTypeSwitch.setChecked(!rideTypeSwitch.isChecked());
-            // updateToggleUI will be called by the switch listener
         });
 
-        // Set initial state
         updateToggleUI.run();
 
-        // Disable submit button by default
         submitRideBtn.setEnabled(false);
 
-        // Helper to check if all fields are filled and date/time is valid
         Runnable checkFieldsAndDate = () -> {
             String addrFrom = addressFrom.getText().toString().trim();
             String addrTo = addressTo.getText().toString().trim();
@@ -117,7 +106,6 @@ public class NewRide extends AppCompatActivity {
 
             boolean allFilled = !addrFrom.isEmpty() && !addrTo.isEmpty() && !dateStr.isEmpty() && !timeStr.isEmpty();
 
-            // Check if date/time is in the future
             boolean dateValid = false;
             if (allFilled) {
                 Date now = new Date();
@@ -128,7 +116,6 @@ public class NewRide extends AppCompatActivity {
             submitRideBtn.setEnabled(allFilled && dateValid);
         };
 
-        // Add text watchers to all relevant fields
         TextWatcher watcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -141,7 +128,6 @@ public class NewRide extends AppCompatActivity {
         dateInput.addTextChangedListener(watcher);
         timeInput.addTextChangedListener(watcher);
 
-        // Date picker dialog
         dateInput.setOnClickListener(v -> {
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
@@ -155,10 +141,8 @@ public class NewRide extends AppCompatActivity {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     dateInput.setText(sdf.format(calendar.getTime()));
 
-                    // After picking date, check if date+time is in the future
                     Date now = new Date();
                     Date rideDate = calendar.getTime();
-                    // Only check if time is also set
                     if (!timeInput.getText().toString().trim().isEmpty() && !rideDate.after(now)) {
                         Toast.makeText(this, "Please enter a valid future date and time.", Toast.LENGTH_SHORT).show();
                     }
@@ -167,7 +151,6 @@ public class NewRide extends AppCompatActivity {
             datePickerDialog.show();
         });
 
-        // Time picker dialog (update calendar object)
         timeInput.setOnClickListener(v -> {
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int minute = calendar.get(Calendar.MINUTE);
@@ -180,10 +163,8 @@ public class NewRide extends AppCompatActivity {
                     String timeStr = String.format("%02d:%02d", hourOfDay, minute1);
                     timeInput.setText(timeStr);
 
-                    // After picking time, check if date+time is in the future
                     Date now = new Date();
                     Date rideDate = calendar.getTime();
-                    // Only check if date is also set
                     if (!dateInput.getText().toString().trim().isEmpty() && !rideDate.after(now)) {
                         Toast.makeText(this, "Please enter a valid future date and time.", Toast.LENGTH_SHORT).show();
                     }
@@ -192,13 +173,10 @@ public class NewRide extends AppCompatActivity {
             timePickerDialog.show();
         });
 
-        // Submit button logic
         submitRideBtn.setOnClickListener(v -> {
-            // Only create the Ride object here
             String addrFrom = addressFrom.getText().toString().trim();
             String addrTo = addressTo.getText().toString().trim();
 
-            // Compose Date object from calendar (date+time)
             Date rideDate = calendar.getTime();
 
             User userDriver = null;
@@ -211,18 +189,13 @@ public class NewRide extends AppCompatActivity {
 
             Ride ride = new Ride(rideDate, addrTo, addrFrom, userDriver, userRider);
 
-            // Print to Logcat
             Log.d("NewRide", "Ride object: " + ride.toString());
 
-            // Add ride to Firebase Database
             DatabaseReference ridesRef = FirebaseDatabase.getInstance().getReference("rides");
             String rideId = ridesRef.push().getKey();
             if (rideId != null) {
                 ridesRef.child(rideId).setValue(ride);
             }
-
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
             finish();
         });
     }
