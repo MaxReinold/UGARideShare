@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -33,6 +34,9 @@ public class Register extends AppCompatActivity {
     FirebaseAuth mAuth;
     TextView gotoLogin;
 
+    /**
+     * Called when the activity is becoming visible to the user.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -44,6 +48,10 @@ public class Register extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,10 +107,13 @@ public class Register extends AppCompatActivity {
 
                 mAuth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            /**
+                             * Called when the registration task is complete.
+                             * @param task The registration task.
+                             */
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
-                                    // Sign in success, update UI with the signed-in user's information
                                     Log.d(TAG, "createUserWithEmail:success");
                                     FirebaseUser user = mAuth.getCurrentUser();
 
@@ -119,9 +130,12 @@ public class Register extends AppCompatActivity {
                                     finish();
                                 } else {
                                     Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                    Toast.makeText(Register.this, "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
-
+                                    if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                        Toast.makeText(Register.this, "This email is already in use.", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(Register.this, "Authentication failed.",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
                         });

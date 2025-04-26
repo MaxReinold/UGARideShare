@@ -34,6 +34,10 @@ import java.text.SimpleDateFormat;
 
 public class NewRide extends AppCompatActivity {
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,7 +181,6 @@ public class NewRide extends AppCompatActivity {
             String addrFrom = addressFrom.getText().toString().trim();
             String addrTo = addressTo.getText().toString().trim();
 
-            // Ensure both date and time are set before getting the time
             String dateStr = dateInput.getText().toString().trim();
             String timeStr = timeInput.getText().toString().trim();
             Date rideDate;
@@ -205,7 +208,6 @@ public class NewRide extends AppCompatActivity {
             DatabaseReference ridesRef = FirebaseDatabase.getInstance().getReference("rides");
             String rideId = ridesRef.push().getKey();
             if (rideId != null) {
-                // Save as a long (milliseconds since epoch)
                 ridesRef.child(rideId).child("date").setValue(rideDate.getTime());
                 ridesRef.child(rideId).child("addressTo").setValue(addrTo);
                 ridesRef.child(rideId).child("addressFrom").setValue(addrFrom);
@@ -215,11 +217,16 @@ public class NewRide extends AppCompatActivity {
                 if (userRider != null) {
                     ridesRef.child(rideId).child("userRider").setValue(userRider);
                 }
+                ridesRef.child(rideId).child("driverConfirm").setValue(null);
+                ridesRef.child(rideId).child("riderConfirm").setValue(null);
             }
             finish();
         });
     }
 
+    /**
+     * Called when the user presses the Up button.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         Intent intent = new Intent(this, MainActivity.class);

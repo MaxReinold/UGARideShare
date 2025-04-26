@@ -45,6 +45,10 @@ public class ViewRide extends AppCompatActivity {
     private String userEmail;
     private Calendar calendar = Calendar.getInstance();
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +85,6 @@ public class ViewRide extends AppCompatActivity {
         userUid = firebaseUser.getUid();
         userEmail = firebaseUser.getEmail();
 
-        // UI references
         Switch rideTypeSwitch = findViewById(R.id.rideTypeSwitch);
         TextView byLabel = findViewById(R.id.byLabel);
         EditText byEmail = findViewById(R.id.byEmail);
@@ -94,12 +97,14 @@ public class ViewRide extends AppCompatActivity {
         TextView offerLabel = findViewById(R.id.offerLabel);
         LinearLayout toggleRow = findViewById(R.id.toggleRow);
 
-        // Disable toggle by default
         rideTypeSwitch.setEnabled(false);
         toggleRow.setEnabled(false);
 
         DatabaseReference rideRef = FirebaseDatabase.getInstance().getReference("rides").child(rideId);
         rideRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            /**
+             * Called when ride data is loaded.
+             */
             @Override
             public void onDataChange(DataSnapshot rideSnap) {
                 if (!rideSnap.exists()) {
@@ -108,7 +113,6 @@ public class ViewRide extends AppCompatActivity {
                     return;
                 }
 
-                // Get ride info
                 String addressFromVal = rideSnap.child("addressFrom").getValue(String.class);
                 String addressToVal = rideSnap.child("addressTo").getValue(String.class);
                 Object dateObjRaw = rideSnap.child("date").getValue();
@@ -117,7 +121,6 @@ public class ViewRide extends AppCompatActivity {
                 String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
                 String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
 
-                // Set calendar to ride date
                 Date rideDate = null;
                 if (dateObjRaw != null) {
                     try {
@@ -130,11 +133,9 @@ public class ViewRide extends AppCompatActivity {
                         rideDate = new Date(millis);
                         calendar.setTime(rideDate);
                     } catch (Exception e) {
-                        // fallback: ignore
                     }
                 }
 
-                // Fill fields
                 addressFrom.setText(addressFromVal != null ? addressFromVal : "");
                 addressTo.setText(addressToVal != null ? addressToVal : "");
                 if (rideDate != null) {
@@ -147,7 +148,6 @@ public class ViewRide extends AppCompatActivity {
                     timeInput.setText("");
                 }
 
-                // Determine ride type and user role
                 boolean hasDriver = driverUid != null && !driverUid.isEmpty();
                 boolean hasRider = riderUid != null && !riderUid.isEmpty();
                 isDriver = hasDriver && driverUid.equals(userUid);
@@ -155,36 +155,30 @@ public class ViewRide extends AppCompatActivity {
                 isOnlyUser = (isDriver && !hasRider) || (isRider && !hasDriver);
                 isUnrelated = !isDriver && !isRider;
 
-                // Set toggle and byLabel/byEmail
                 if (hasDriver && !hasRider) {
-                    // Offered ride
                     rideTypeSwitch.setChecked(true);
                     offerLabel.setTypeface(null, android.graphics.Typeface.BOLD);
                     requestLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
                     byLabel.setText("Offered by");
                     byEmail.setText(driverEmail != null ? driverEmail : "");
                 } else if (!hasDriver && hasRider) {
-                    // Requested ride
                     rideTypeSwitch.setChecked(false);
                     requestLabel.setTypeface(null, android.graphics.Typeface.BOLD);
                     offerLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
                     byLabel.setText("Requested by");
                     byEmail.setText(riderEmail != null ? riderEmail : "");
                 } else if (hasDriver && hasRider) {
-                    // Both present, show both
                     rideTypeSwitch.setChecked(true);
                     offerLabel.setTypeface(null, android.graphics.Typeface.BOLD);
                     requestLabel.setTypeface(null, android.graphics.Typeface.NORMAL);
                     byLabel.setText("Offered by");
                     byEmail.setText(driverEmail != null ? driverEmail : "");
                 } else {
-                    // Should not happen
                     rideTypeSwitch.setChecked(false);
                     byLabel.setText("By");
                     byEmail.setText("");
                 }
 
-                // Set fields enabled/disabled
                 boolean editable = isOnlyUser;
                 addressFrom.setEnabled(editable);
                 addressTo.setEnabled(editable);
@@ -195,7 +189,6 @@ public class ViewRide extends AppCompatActivity {
                 timeInput.setFocusable(editable);
                 timeInput.setClickable(editable);
 
-                // Date/time pickers if editable
                 if (editable) {
                     dateInput.setOnClickListener(v -> {
                         int year = calendar.get(Calendar.YEAR);
@@ -229,9 +222,7 @@ public class ViewRide extends AppCompatActivity {
                     timeInput.setOnClickListener(null);
                 }
 
-                // Action button logic
                 if (isOnlyUser) {
-                    // Allow edit and cancel
                     actionRideBtn.setText("Save Changes");
                     actionRideBtn.setEnabled(true);
 
@@ -241,7 +232,6 @@ public class ViewRide extends AppCompatActivity {
                     ((LinearLayout) findViewById(R.id.main)).addView(cancelBtn);
 
                     actionRideBtn.setOnClickListener(v -> {
-                        // Save changes
                         String addrFrom = addressFrom.getText().toString().trim();
                         String addrTo = addressTo.getText().toString().trim();
                         String dateStr = dateInput.getText().toString().trim();
@@ -269,7 +259,6 @@ public class ViewRide extends AppCompatActivity {
                     });
 
                 } else if (isDriver || isRider) {
-                    // Allow remove self
                     actionRideBtn.setText("Remove Me From Ride");
                     actionRideBtn.setEnabled(true);
                     actionRideBtn.setOnClickListener(v -> {
@@ -283,7 +272,6 @@ public class ViewRide extends AppCompatActivity {
                         finish();
                     });
                 } else if (isUnrelated) {
-                    // Allow accept as driver or rider
                     if (hasDriver && !hasRider) {
                         actionRideBtn.setText("Accept as Rider");
                         actionRideBtn.setEnabled(true);
@@ -312,6 +300,9 @@ public class ViewRide extends AppCompatActivity {
                 }
             }
 
+            /**
+             * Called if loading ride data fails.
+             */
             @Override
             public void onCancelled(DatabaseError error) {
                 Toast.makeText(ViewRide.this, "Failed to load ride.", Toast.LENGTH_SHORT).show();
@@ -320,12 +311,18 @@ public class ViewRide extends AppCompatActivity {
         });
     }
 
+    /**
+     * Called to save the instance state.
+     */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("rideId", rideId);
     }
 
+    /**
+     * Called when the user presses the Up button.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         finish();

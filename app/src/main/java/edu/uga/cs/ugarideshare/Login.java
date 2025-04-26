@@ -31,6 +31,9 @@ public class Login extends AppCompatActivity {
     FirebaseAuth mAuth;
     TextView gotoRegister;
 
+    /**
+     * Called when the activity is becoming visible to the user.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -42,6 +45,10 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,10 +94,13 @@ public class Login extends AppCompatActivity {
 
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            /**
+                             * Called when the login task is complete.
+                             * @param task The login task.
+                             */
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
-                                    // Sign in success, update UI with the signed-in user's information
                                     Log.d(TAG, "signInWithEmail:success");
                                     Toast.makeText(Login.this, "Successfully Logged In.",
                                             Toast.LENGTH_SHORT).show();
@@ -98,7 +108,6 @@ public class Login extends AppCompatActivity {
                                     startActivity(intent);
                                     finish();
                                 } else {
-                                    // If sign in fails, display a message to the user.
                                     Log.w(TAG, "signInWithEmail:failure", task.getException());
                                     Toast.makeText(Login.this, "Authentication failed.",
                                             Toast.LENGTH_SHORT).show();

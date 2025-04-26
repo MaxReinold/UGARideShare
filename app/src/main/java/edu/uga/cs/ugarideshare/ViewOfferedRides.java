@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Button;
-import android.widget.Toast;
 import android.graphics.Typeface;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,6 +36,10 @@ public class ViewOfferedRides extends AppCompatActivity {
     private LinearLayout rideListLayout;
     private String userUid;
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +67,9 @@ public class ViewOfferedRides extends AppCompatActivity {
         ridesRef = FirebaseDatabase.getInstance().getReference("rides");
     }
 
+    /**
+     * Called when the activity will start interacting with the user.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -77,7 +83,6 @@ public class ViewOfferedRides extends AppCompatActivity {
                 for (DataSnapshot rideSnap : snapshot.getChildren()) {
                     String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
                     String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
-                    // Only show rides where user is NOT the driver or rider, but is an offered ride (has driver, no rider)
                     if (driverUid != null && !driverUid.isEmpty()
                         && (riderUid == null || riderUid.isEmpty())
                         && !driverUid.equals(userUid)) {
@@ -110,6 +115,11 @@ public class ViewOfferedRides extends AppCompatActivity {
                             }
                         }
 
+                        String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
+                        String driverEmail = rideSnap.child("userDriver/email").getValue(String.class);
+                        String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
+                        String riderEmail = rideSnap.child("userRider/email").getValue(String.class);
+
                         CardView cardView = new CardView(ViewOfferedRides.this);
                         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -123,6 +133,19 @@ public class ViewOfferedRides extends AppCompatActivity {
                         LinearLayout cardContent = new LinearLayout(ViewOfferedRides.this);
                         cardContent.setOrientation(LinearLayout.VERTICAL);
                         cardContent.setPadding(48, 32, 48, 32);
+
+                        if (driverUid != null && !driverUid.isEmpty() && riderUid != null && !riderUid.isEmpty()) {
+                            TextView driverView = new TextView(ViewOfferedRides.this);
+                            driverView.setText("Driver: " + (driverEmail != null ? driverEmail : ""));
+                            cardContent.addView(driverView);
+                            TextView riderView = new TextView(ViewOfferedRides.this);
+                            riderView.setText("Rider: " + (riderEmail != null ? riderEmail : ""));
+                            cardContent.addView(riderView);
+                        } else if (driverUid != null && !driverUid.isEmpty()) {
+                            TextView driverView = new TextView(ViewOfferedRides.this);
+                            driverView.setText("Driver: " + (driverEmail != null ? driverEmail : ""));
+                            cardContent.addView(driverView);
+                        }
 
                         TextView fromView = new TextView(ViewOfferedRides.this);
                         fromView.setText("From: " + (addressFrom != null ? addressFrom : ""));
@@ -161,12 +184,15 @@ public class ViewOfferedRides extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError error) {
-                Toast.makeText(ViewOfferedRides.this, "Failed to load rides.", Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(ViewOfferedRides.this, "Failed to load rides.", android.widget.Toast.LENGTH_SHORT).show();
             }
         };
         ridesRef.addValueEventListener(ridesListener);
     }
 
+    /**
+     * Called when the activity is going into the background.
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -175,6 +201,9 @@ public class ViewOfferedRides extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when the user presses the Up button.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         finish();

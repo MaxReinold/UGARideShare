@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Button;
-import android.widget.Toast;
 import android.graphics.Typeface;
 import androidx.appcompat.app.ActionBar;
 import androidx.cardview.widget.CardView;
@@ -38,6 +37,10 @@ public class ViewRequestedRides extends AppCompatActivity {
     private LinearLayout rideListLayout;
     private String userUid;
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +68,9 @@ public class ViewRequestedRides extends AppCompatActivity {
         ridesRef = FirebaseDatabase.getInstance().getReference("rides");
     }
 
+    /**
+     * Called when the activity will start interacting with the user.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -78,7 +84,6 @@ public class ViewRequestedRides extends AppCompatActivity {
                 for (DataSnapshot rideSnap : snapshot.getChildren()) {
                     String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
                     String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
-                    // Only show rides where user is NOT the driver or rider, but is a requested ride (has rider, no driver)
                     if (riderUid != null && !riderUid.isEmpty()
                         && (driverUid == null || driverUid.isEmpty())
                         && !riderUid.equals(userUid)) {
@@ -111,6 +116,11 @@ public class ViewRequestedRides extends AppCompatActivity {
                             }
                         }
 
+                        String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
+                        String driverEmail = rideSnap.child("userDriver/email").getValue(String.class);
+                        String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
+                        String riderEmail = rideSnap.child("userRider/email").getValue(String.class);
+
                         CardView cardView = new CardView(ViewRequestedRides.this);
                         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -124,6 +134,19 @@ public class ViewRequestedRides extends AppCompatActivity {
                         LinearLayout cardContent = new LinearLayout(ViewRequestedRides.this);
                         cardContent.setOrientation(LinearLayout.VERTICAL);
                         cardContent.setPadding(48, 32, 48, 32);
+
+                        if (driverUid != null && !driverUid.isEmpty() && riderUid != null && !riderUid.isEmpty()) {
+                            TextView driverView = new TextView(ViewRequestedRides.this);
+                            driverView.setText("Driver: " + (driverEmail != null ? driverEmail : ""));
+                            cardContent.addView(driverView);
+                            TextView riderView = new TextView(ViewRequestedRides.this);
+                            riderView.setText("Rider: " + (riderEmail != null ? riderEmail : ""));
+                            cardContent.addView(riderView);
+                        } else if (riderUid != null && !riderUid.isEmpty()) {
+                            TextView riderView = new TextView(ViewRequestedRides.this);
+                            riderView.setText("Rider: " + (riderEmail != null ? riderEmail : ""));
+                            cardContent.addView(riderView);
+                        }
 
                         TextView fromView = new TextView(ViewRequestedRides.this);
                         fromView.setText("From: " + (addressFrom != null ? addressFrom : ""));
@@ -168,6 +191,9 @@ public class ViewRequestedRides extends AppCompatActivity {
         ridesRef.addValueEventListener(ridesListener);
     }
 
+    /**
+     * Called when the activity is going into the background.
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -176,6 +202,9 @@ public class ViewRequestedRides extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when the user presses the Up button.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         finish();

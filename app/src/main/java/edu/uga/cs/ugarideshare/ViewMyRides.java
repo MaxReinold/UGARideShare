@@ -44,6 +44,10 @@ public class ViewMyRides extends AppCompatActivity {
     private LinearLayout rideListLayout;
     private String userUid;
 
+    /**
+     * Called when the activity is starting.
+     * @param savedInstanceState The previously saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +75,9 @@ public class ViewMyRides extends AppCompatActivity {
         ridesRef = FirebaseDatabase.getInstance().getReference("rides");
     }
 
+    /**
+     * Called when the activity will start interacting with the user.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -128,6 +135,11 @@ public class ViewMyRides extends AppCompatActivity {
                             }
                         }
 
+                        String driverUid = rideSnap.child("userDriver/uid").getValue(String.class);
+                        String driverEmail = rideSnap.child("userDriver/email").getValue(String.class);
+                        String riderUid = rideSnap.child("userRider/uid").getValue(String.class);
+                        String riderEmail = rideSnap.child("userRider/email").getValue(String.class);
+
                         CardView cardView = new CardView(ViewMyRides.this);
                         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -141,6 +153,39 @@ public class ViewMyRides extends AppCompatActivity {
                         LinearLayout cardContent = new LinearLayout(ViewMyRides.this);
                         cardContent.setOrientation(LinearLayout.VERTICAL);
                         cardContent.setPadding(48, 32, 48, 32);
+
+                        if (driverUid != null && userUid.equals(driverUid) && riderUid != null && userUid.equals(riderUid)) {
+                            TextView roleView = new TextView(ViewMyRides.this);
+                            roleView.setText("Driving & Riding");
+                            roleView.setTypeface(null, Typeface.BOLD_ITALIC);
+                            cardContent.addView(roleView);
+                        } else if (driverUid != null && userUid.equals(driverUid) && riderUid != null && !userUid.equals(riderUid)) {
+                            TextView roleView = new TextView(ViewMyRides.this);
+                            roleView.setText("Driving");
+                            roleView.setTypeface(null, Typeface.BOLD);
+                            cardContent.addView(roleView);
+                            TextView riderView = new TextView(ViewMyRides.this);
+                            riderView.setText("Rider: " + (riderEmail != null ? riderEmail : ""));
+                            cardContent.addView(riderView);
+                        } else if (riderUid != null && userUid.equals(riderUid) && driverUid != null && !userUid.equals(driverUid)) {
+                            TextView roleView = new TextView(ViewMyRides.this);
+                            roleView.setText("Riding");
+                            roleView.setTypeface(null, Typeface.BOLD);
+                            cardContent.addView(roleView);
+                            TextView driverView = new TextView(ViewMyRides.this);
+                            driverView.setText("Driver: " + (driverEmail != null ? driverEmail : ""));
+                            cardContent.addView(driverView);
+                        } else if (driverUid != null && userUid.equals(driverUid)) {
+                            TextView roleView = new TextView(ViewMyRides.this);
+                            roleView.setText("Driving");
+                            roleView.setTypeface(null, Typeface.BOLD);
+                            cardContent.addView(roleView);
+                        } else if (riderUid != null && userUid.equals(riderUid)) {
+                            TextView roleView = new TextView(ViewMyRides.this);
+                            roleView.setText("Riding");
+                            roleView.setTypeface(null, Typeface.BOLD);
+                            cardContent.addView(roleView);
+                        }
 
                         TextView fromView = new TextView(ViewMyRides.this);
                         fromView.setText("From: " + (addressFrom != null ? addressFrom : ""));
@@ -188,6 +233,9 @@ public class ViewMyRides extends AppCompatActivity {
         ridesRef.addValueEventListener(ridesListener);
     }
 
+    /**
+     * Called when the activity is going into the background.
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -196,6 +244,9 @@ public class ViewMyRides extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called to save the instance state.
+     */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -203,6 +254,9 @@ public class ViewMyRides extends AppCompatActivity {
         outState.putStringArrayList("rideSummaries", new ArrayList<>(rideSummaries));
     }
 
+    /**
+     * Called to restore the instance state.
+     */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -210,6 +264,9 @@ public class ViewMyRides extends AppCompatActivity {
         rideSummaries = savedInstanceState.getStringArrayList("rideSummaries");
     }
 
+    /**
+     * Called when the user presses the Up button.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         finish();

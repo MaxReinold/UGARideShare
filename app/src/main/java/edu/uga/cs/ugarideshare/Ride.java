@@ -10,8 +10,19 @@ public class Ride implements Serializable {
     public User userDriver;
     public User userRider;
 
+    /**
+     * Default constructor.
+     */
     public Ride() {}
 
+    /**
+     * Constructs a Ride object.
+     * @param date The date of the ride.
+     * @param addressTo The destination address.
+     * @param addressFrom The starting address.
+     * @param userDriver The driver user.
+     * @param userRider The rider user.
+     */
     public Ride(Date date, String addressTo, String addressFrom, User userDriver, User userRider) {
         this.date = date;
         this.addressTo = addressTo;
@@ -20,6 +31,10 @@ public class Ride implements Serializable {
         this.userRider = userRider;
     }
 
+    /**
+     * Returns a string representation of the Ride.
+     * @return String representation.
+     */
     @Override
     public String toString() {
         return "Ride{" +
