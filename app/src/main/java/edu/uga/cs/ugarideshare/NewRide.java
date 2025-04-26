@@ -177,7 +177,18 @@ public class NewRide extends AppCompatActivity {
             String addrFrom = addressFrom.getText().toString().trim();
             String addrTo = addressTo.getText().toString().trim();
 
-            Date rideDate = calendar.getTime();
+            // Ensure both date and time are set before getting the time
+            String dateStr = dateInput.getText().toString().trim();
+            String timeStr = timeInput.getText().toString().trim();
+            Date rideDate;
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                rideDate = sdf.parse(dateStr + " " + timeStr);
+                calendar.setTime(rideDate);
+            } catch (Exception e) {
+                Toast.makeText(this, "Invalid date/time.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             User userDriver = null;
             User userRider = null;
@@ -194,7 +205,16 @@ public class NewRide extends AppCompatActivity {
             DatabaseReference ridesRef = FirebaseDatabase.getInstance().getReference("rides");
             String rideId = ridesRef.push().getKey();
             if (rideId != null) {
-                ridesRef.child(rideId).setValue(ride);
+                // Save as a long (milliseconds since epoch)
+                ridesRef.child(rideId).child("date").setValue(rideDate.getTime());
+                ridesRef.child(rideId).child("addressTo").setValue(addrTo);
+                ridesRef.child(rideId).child("addressFrom").setValue(addrFrom);
+                if (userDriver != null) {
+                    ridesRef.child(rideId).child("userDriver").setValue(userDriver);
+                }
+                if (userRider != null) {
+                    ridesRef.child(rideId).child("userRider").setValue(userRider);
+                }
             }
             finish();
         });
