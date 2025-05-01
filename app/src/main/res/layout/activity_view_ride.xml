@@ -1,119 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    tools:context=".ViewRide">
-
-    <!-- Toggle for Request/Offer -->
+    android:layout_height="match_parent">
     <LinearLayout
-        android:id="@+id/toggleRow"
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_margin="20dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:orientation="vertical"
+        android:padding="24dp"
+        tools:context=".ViewRide">
+
+        <LinearLayout
+            android:id="@+id/toggleRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_margin="20dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/requestLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Request"
+                android:textSize="16sp"
+                android:paddingEnd="12dp"
+                android:textStyle="bold"/>
+
+            <Switch
+                android:id="@+id/rideTypeSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textOff=""
+                android:textOn=""/>
+
+            <TextView
+                android:id="@+id/offerLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Offer"
+                android:textSize="16sp"
+                android:paddingStart="12dp"
+                android:textStyle="normal"/>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/addressFrom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:hint="Address From"
+            android:inputType="textPostalAddress"
+            android:paddingBottom="12dp" />
+
+        <EditText
+            android:id="@+id/addressTo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address To"
+            android:layout_margin="20dp"
+            android:inputType="textPostalAddress"
+            android:paddingBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/dateInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Date"
+            android:layout_margin="20dp"
+            android:focusable="false"
+            android:clickable="true"
+            android:paddingBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/timeInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Time"
+            android:layout_margin="20dp"
+            android:focusable="false"
+            android:clickable="true"
+            android:paddingBottom="12dp"/>
 
         <TextView
-            android:id="@+id/requestLabel"
+            android:id="@+id/byLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Request"
+            android:text="Requested by"
             android:textSize="16sp"
-            android:paddingEnd="12dp"
-            android:textStyle="bold"/>
+            android:layout_marginHorizontal="20dp"
+            android:paddingTop="12dp"/>
 
-        <Switch
-            android:id="@+id/rideTypeSwitch"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/byEmail"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textOff=""
-            android:textOn=""/>
+            android:enabled="false"
+            android:text="user@example.com"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="20dp"
+            android:paddingBottom="16dp"/>
 
-        <TextView
-            android:id="@+id/offerLabel"
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/actionRideBtn"
+            android:layout_margin="20dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Offer"
-            android:textSize="16sp"
-            android:paddingStart="12dp"
-            android:textStyle="normal"/>
+            android:text="Action"/>
+
     </LinearLayout>
-
-    <!-- Address From -->
-    <EditText
-        android:id="@+id/addressFrom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:hint="Address From"
-        android:inputType="textPostalAddress"
-        android:paddingBottom="12dp" />
-
-    <!-- Address To -->
-    <EditText
-        android:id="@+id/addressTo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Address To"
-        android:layout_margin="20dp"
-        android:inputType="textPostalAddress"
-        android:paddingBottom="12dp"/>
-
-    <!-- Date -->
-    <EditText
-        android:id="@+id/dateInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Date"
-        android:layout_margin="20dp"
-        android:focusable="false"
-        android:clickable="true"
-        android:paddingBottom="12dp"/>
-
-    <!-- Time -->
-    <EditText
-        android:id="@+id/timeInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Time"
-        android:layout_margin="20dp"
-        android:focusable="false"
-        android:clickable="true"
-        android:paddingBottom="12dp"/>
-
-    <!-- Requested/Offered by (label + disabled input) -->
-    <TextView
-        android:id="@+id/byLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Requested by"
-        android:textSize="16sp"
-        android:layout_marginHorizontal="20dp"
-        android:paddingTop="12dp"/>
-
-    <EditText
-        android:id="@+id/byEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="user@example.com"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="20dp"
-        android:paddingBottom="16dp"/>
-
-    <!-- Action button (Save/Cancel/Remove/Accept) -->
-    <Button
-        android:id="@+id/actionRideBtn"
-        android:layout_margin="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Action"/>
-
-</LinearLayout>
+</ScrollView>

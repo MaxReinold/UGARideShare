@@ -89,6 +89,16 @@ public class ViewOfferedRides extends AppCompatActivity {
                         userRides.add(rideSnap);
                     }
                 }
+                userRides.sort((a, b) -> {
+                    Long aDate = 0L, bDate = 0L;
+                    Object aObj = a.child("date").getValue();
+                    Object bObj = b.child("date").getValue();
+                    if (aObj instanceof Long) aDate = (Long) aObj;
+                    else if (aObj instanceof Double) aDate = ((Double) aObj).longValue();
+                    if (bObj instanceof Long) bDate = (Long) bObj;
+                    else if (bObj instanceof Double) bDate = ((Double) bObj).longValue();
+                    return aDate.compareTo(bDate);
+                });
                 if (userRides.isEmpty()) {
                     TextView emptyView = new TextView(ViewOfferedRides.this);
                     emptyView.setText("No offered rides found.");

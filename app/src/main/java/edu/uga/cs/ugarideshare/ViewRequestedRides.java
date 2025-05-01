@@ -10,6 +10,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.cardview.widget.CardView;
 import android.view.ViewGroup;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DatabaseError;
+
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -90,6 +92,16 @@ public class ViewRequestedRides extends AppCompatActivity {
                         userRides.add(rideSnap);
                     }
                 }
+                userRides.sort((a, b) -> {
+                    Long aDate = 0L, bDate = 0L;
+                    Object aObj = a.child("date").getValue();
+                    Object bObj = b.child("date").getValue();
+                    if (aObj instanceof Long) aDate = (Long) aObj;
+                    else if (aObj instanceof Double) aDate = ((Double) aObj).longValue();
+                    if (bObj instanceof Long) bDate = (Long) bObj;
+                    else if (bObj instanceof Double) bDate = ((Double) bObj).longValue();
+                    return aDate.compareTo(bDate);
+                });
                 if (userRides.isEmpty()) {
                     TextView emptyView = new TextView(ViewRequestedRides.this);
                     emptyView.setText("No requested rides found.");
